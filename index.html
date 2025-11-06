@@ -187,11 +187,45 @@
             color: #dc3545;
         }
 
+        .product-image-container {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
         .product-image {
             width: 100%;
             height: 200px;
             object-fit: cover;
             border-bottom: 1px solid #eee;
+            transition: transform 0.3s;
+        }
+
+        .product-image-container:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .zoom-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+
+        .product-image-container:hover .zoom-icon {
+            opacity: 1;
         }
 
         .product-info {
@@ -263,6 +297,95 @@
             grid-column: 1 / -1;
         }
 
+        /* Modal de imagem em tela cheia */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            display: block;
+            margin: auto;
+            max-width: 90%;
+            max-height: 90%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+            z-index: 1001;
+        }
+
+        .close-modal:hover {
+            color: #ccc;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-prev {
+            left: 20px;
+        }
+
+        .modal-next {
+            right: 20px;
+        }
+
+        .modal-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
         footer {
             text-align: center;
             padding: 2rem;
@@ -310,6 +433,26 @@
             .header-image {
                 max-height: 200px;
             }
+
+            .modal-nav {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .modal-prev {
+                left: 10px;
+            }
+
+            .modal-next {
+                right: 10px;
+            }
+
+            .close-modal {
+                top: 10px;
+                right: 20px;
+                font-size: 30px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -332,7 +475,6 @@
 </head>
 <body>
     <header>
-        <!-- Substitua o src pelo link da sua imagem com título e logo -->
         <img src="https://i.ibb.co/Fb7KY7Mz/Catalogo-Francal.png" 
              alt="Catálogo de Calçados" 
              class="header-image">
@@ -379,8 +521,17 @@
         </div>
     </div>
 
+    <!-- Modal para imagem em tela cheia -->
+    <div id="imageModal" class="modal">
+        <span class="close-modal">&times;</span>
+        <button class="modal-nav modal-prev">&#10094;</button>
+        <button class="modal-nav modal-next">&#10095;</button>
+        <img class="modal-content" id="modalImage">
+        <div class="modal-caption" id="modalCaption"></div>
+    </div>
+
     <footer>
-        <p>Catálogo de Calçados Francal &copy; 2025 - Atualizado automaticamente via planilha</p>
+        <p>Catálogo de Calçados &copy; 2023 - Atualizado automaticamente via planilha</p>
     </footer>
 
     <script>
@@ -390,6 +541,8 @@
         // Array para armazenar todos os produtos
         let allProducts = [];
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let currentProducts = []; // Produtos atualmente exibidos
+        let currentImageIndex = 0; // Índice da imagem atual no modal
 
         // Função para carregar dados da planilha
         async function loadProducts() {
@@ -404,9 +557,10 @@
                 
                 // Converter CSV para JSON
                 allProducts = parseCSV(csvData);
+                currentProducts = [...allProducts];
                 
                 // Exibir todos os produtos inicialmente
-                displayProducts(allProducts);
+                displayProducts(currentProducts);
                 
                 // Preencher filtros
                 populateFilters(allProducts);
@@ -449,6 +603,7 @@
         // Função para exibir produtos
         function displayProducts(products) {
             const container = document.getElementById('products-container');
+            currentProducts = products;
             
             if (products.length === 0) {
                 container.innerHTML = '<div class="error">Nenhum produto encontrado.</div>';
@@ -457,22 +612,26 @@
             
             container.innerHTML = '';
             
-            products.forEach(product => {
+            products.forEach((product, index) => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
                 const stockClass = parseInt(product.estoque) > 0 ? 'in-stock' : 'out-of-stock';
                 const stockText = parseInt(product.estoque) > 0 ? `Em estoque: ${product.estoque}` : 'Fora de estoque';
                 const isFavorited = favorites.includes(product.codigo);
+                const imageUrl = product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível';
                 
                 card.innerHTML = `
                     <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-code="${product.codigo}">
                         ${isFavorited ? '❤️' : '🤍'}
                     </button>
-                    <img src="${product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível'}" 
-                         alt="${product.descricao}" 
-                         class="product-image"
-                         onerror="this.src='https://via.placeholder.com/300x200?text=Imagem+Indisponível'">
+                    <div class="product-image-container" data-index="${index}">
+                        <div class="zoom-icon">🔍</div>
+                        <img src="${imageUrl}" 
+                             alt="${product.descricao}" 
+                             class="product-image"
+                             onerror="this.src='https://via.placeholder.com/300x200?text=Imagem+Indisponível'">
+                    </div>
                     <div class="product-info">
                         <div class="product-code">Código: ${product.codigo}</div>
                         <div class="product-description">${product.descricao}</div>
@@ -490,6 +649,64 @@
             document.querySelectorAll('.favorite-btn').forEach(btn => {
                 btn.addEventListener('click', toggleFavorite);
             });
+            
+            // Adicionar event listeners para as imagens
+            document.querySelectorAll('.product-image-container').forEach(container => {
+                container.addEventListener('click', openModal);
+            });
+        }
+        
+        // Função para abrir o modal com a imagem
+        function openModal(event) {
+            const container = event.currentTarget;
+            const index = parseInt(container.getAttribute('data-index'));
+            const product = currentProducts[index];
+            
+            if (product) {
+                currentImageIndex = index;
+                const modal = document.getElementById('imageModal');
+                const modalImg = document.getElementById('modalImage');
+                const caption = document.getElementById('modalCaption');
+                
+                modal.style.display = 'block';
+                modalImg.src = product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível';
+                caption.innerHTML = `
+                    <strong>${product.descricao}</strong><br>
+                    Código: ${product.codigo} | Seção: ${product.secao || 'Geral'} | Estoque: ${product.estoque}
+                `;
+                
+                // Prevenir scroll do body quando modal estiver aberto
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        // Função para fechar o modal
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Função para navegar entre imagens
+        function navigateImage(direction) {
+            currentImageIndex += direction;
+            
+            // Verificar limites
+            if (currentImageIndex < 0) {
+                currentImageIndex = currentProducts.length - 1;
+            } else if (currentImageIndex >= currentProducts.length) {
+                currentImageIndex = 0;
+            }
+            
+            const product = currentProducts[currentImageIndex];
+            const modalImg = document.getElementById('modalImage');
+            const caption = document.getElementById('modalCaption');
+            
+            modalImg.src = product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível';
+            caption.innerHTML = `
+                <strong>${product.descricao}</strong><br>
+                Código: ${product.codigo} | Seção: ${product.secao || 'Geral'} | Estoque: ${product.estoque}
+            `;
         }
         
         // Função para preencher os filtros
@@ -640,20 +857,55 @@
             // Salvar PDF
             doc.save('catalogo-favoritos.pdf');
         }
-        
-        // Configurar eventos
-        document.getElementById('section-filter').addEventListener('change', filterProducts);
-        document.getElementById('stock-filter').addEventListener('change', filterProducts);
-        document.getElementById('search-button').addEventListener('click', filterProducts);
-        document.getElementById('search').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                filterProducts();
-            }
+
+        // Configurar eventos quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Eventos dos filtros
+            document.getElementById('section-filter').addEventListener('change', filterProducts);
+            document.getElementById('stock-filter').addEventListener('change', filterProducts);
+            document.getElementById('search-button').addEventListener('click', filterProducts);
+            document.getElementById('search').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    filterProducts();
+                }
+            });
+            
+            // Evento do botão PDF
+            document.getElementById('generate-pdf').addEventListener('click', generatePDF);
+            
+            // Eventos do modal
+            document.querySelector('.close-modal').addEventListener('click', closeModal);
+            document.querySelector('.modal-prev').addEventListener('click', function() {
+                navigateImage(-1);
+            });
+            document.querySelector('.modal-next').addEventListener('click', function() {
+                navigateImage(1);
+            });
+            
+            // Fechar modal ao clicar fora da imagem
+            document.getElementById('imageModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeModal();
+                }
+            });
+            
+            // Navegação por teclado
+            document.addEventListener('keydown', function(event) {
+                const modal = document.getElementById('imageModal');
+                if (modal.style.display === 'block') {
+                    if (event.key === 'Escape') {
+                        closeModal();
+                    } else if (event.key === 'ArrowLeft') {
+                        navigateImage(-1);
+                    } else if (event.key === 'ArrowRight') {
+                        navigateImage(1);
+                    }
+                }
+            });
+            
+            // Carregar produtos
+            loadProducts();
         });
-        document.getElementById('generate-pdf').addEventListener('click', generatePDF);
-        
-        // Carregar produtos quando a página carregar
-        document.addEventListener('DOMContentLoaded', loadProducts);
     </script>
 </body>
 </html>
