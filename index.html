@@ -727,8 +727,19 @@
                     return;
                 }
 
-                // Ordenar por data (mais recente primeiro)
-                clientPurchases.sort((a, b) => new Date(b.DATA) - new Date(a.DATA));
+                // Ordenar por mês (usando o mês como string)
+                clientPurchases.sort((a, b) => {
+                    const monthOrder = {
+                        'janeiro': 1, 'fevereiro': 2, 'março': 3, 'abril': 4,
+                        'maio': 5, 'junho': 6, 'julho': 7, 'agosto': 8,
+                        'setembro': 9, 'outubro': 10, 'novembro': 11, 'dezembro': 12
+                    };
+                    
+                    const monthA = a.DATA ? a.DATA.toLowerCase() : '';
+                    const monthB = b.DATA ? b.DATA.toLowerCase() : '';
+                    
+                    return (monthOrder[monthB] || 0) - (monthOrder[monthA] || 0);
+                });
 
                 // Calcular totais
                 const totalProducts = clientPurchases.length;
@@ -739,7 +750,7 @@
                     <table class="history-table">
                         <thead>
                             <tr>
-                                <th>Data</th>
+                                <th>Mês</th>
                                 <th>Produto</th>
                                 <th>Quantidade</th>
                             </tr>
@@ -750,7 +761,7 @@
                 clientPurchases.forEach(purchase => {
                     tableHTML += `
                         <tr>
-                            <td>${formatDate(purchase.DATA)}</td>
+                            <td>${formatMonth(purchase.DATA)}</td>
                             <td>${purchase.DESCRICAO || 'N/A'}</td>
                             <td>${purchase.QTT || '0'}</td>
                         </tr>
@@ -773,15 +784,13 @@
             }
         }
 
-        // Função para formatar data
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('pt-BR');
-            } catch {
-                return dateString;
-            }
+        // Função para formatar mês (capitalizar primeira letra)
+        function formatMonth(monthString) {
+            if (!monthString) return 'N/A';
+            
+            // Converte para minúsculo e capitaliza a primeira letra
+            const month = monthString.toLowerCase().trim();
+            return month.charAt(0).toUpperCase() + month.slice(1);
         }
         
         // Função para converter CSV para JSON
