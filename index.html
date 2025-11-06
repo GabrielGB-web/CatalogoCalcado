@@ -26,6 +26,15 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
+        .logo-container {
+            margin-bottom: 1rem;
+        }
+
+        .company-logo {
+            max-width: 200px;
+            height: auto;
+        }
+
         h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
@@ -37,7 +46,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1600px; /* Aumentei a largura máxima */
             margin: 0 auto;
             padding: 2rem;
         }
@@ -100,8 +109,8 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(5, 1fr); /* 5 produtos por linha */
+            gap: 1.5rem; /* Reduzi um pouco o gap para caber 5 produtos */
         }
 
         .product-card {
@@ -110,6 +119,9 @@
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .product-card:hover {
@@ -119,27 +131,30 @@
 
         .product-image {
             width: 100%;
-            height: 250px;
+            height: 200px; /* Reduzi a altura para melhor proporção */
             object-fit: cover;
             border-bottom: 1px solid #eee;
         }
 
         .product-info {
-            padding: 1.5rem;
+            padding: 1.2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .product-code {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #777;
             margin-bottom: 0.5rem;
         }
 
         .product-description {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             margin-bottom: 1rem;
             color: #333;
-            min-height: 60px;
+            flex-grow: 1;
         }
 
         .product-section {
@@ -148,15 +163,16 @@
             color: #495057;
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             margin-bottom: 1rem;
+            align-self: flex-start;
         }
 
         .stock-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 1rem;
+            margin-top: auto;
             padding-top: 1rem;
             border-top: 1px solid #eee;
         }
@@ -176,6 +192,7 @@
             padding: 2rem;
             font-size: 1.2rem;
             color: #6a11cb;
+            grid-column: 1 / -1;
         }
 
         .error {
@@ -185,6 +202,7 @@
             background-color: #f8d7da;
             border-radius: 10px;
             margin: 2rem 0;
+            grid-column: 1 / -1;
         }
 
         footer {
@@ -193,6 +211,18 @@
             margin-top: 3rem;
             background-color: #343a40;
             color: white;
+        }
+
+        @media (max-width: 1400px) {
+            .products-grid {
+                grid-template-columns: repeat(4, 1fr); /* 4 produtos em telas menores */
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 produtos em tablets grandes */
+            }
         }
 
         @media (max-width: 768px) {
@@ -210,13 +240,27 @@
             }
             
             .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                grid-template-columns: repeat(2, 1fr); /* 2 produtos em tablets */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr; /* 1 produto em mobile */
+            }
+            
+            .container {
+                padding: 1rem;
             }
         }
     </style>
 </head>
 <body>
     <header>
+        <div class="logo-container">
+            <!-- Substitua o src pelo link da sua imagem -->
+            <img src="https://via.placeholder.com/200x80?text=LOGO+DA+EMPRESA" alt="Logo da Empresa" class="company-logo">
+        </div>
         <h1>Catálogo de Calçados</h1>
         <p class="subtitle">Encontre o calçado perfeito para você</p>
     </header>
@@ -254,14 +298,16 @@
     </div>
 
     <footer>
-        <p>Catálogo de Calçados &copy; 2023 - Atualizado automaticamente via planilha</p>
+        <p>Catálogo de Calçados Francal &copy; 2025 - Atualizado automaticamente via planilha</p>
     </footer>
 
     <script>
         // ID da planilha pública do Google Sheets
         // Substitua pelo ID da sua planilha
         const SPREADSHEET_ID = '1tiz1z552NN3srs-k4gKNYB253PEaIsjesTgbkyfIaIg';
-        const API_KEY = 'YOUR_GOOGLE_API_KEY'; // Opcional para planilhas públicas
+        
+        // Array para armazenar todos os produtos
+        let allProducts = [];
         
         // Função para carregar dados da planilha
         async function loadProducts() {
@@ -269,23 +315,19 @@
             
             try {
                 // URL para acessar a planilha como JSON (formato CSV)
-                // Para planilhas públicas, você pode usar:
                 const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv`;
-                
-                // Alternativa: se você publicar a planilha como CSV
-                // const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv`;
                 
                 const response = await fetch(url);
                 const csvData = await response.text();
                 
                 // Converter CSV para JSON
-                const products = parseCSV(csvData);
+                allProducts = parseCSV(csvData);
                 
-                // Exibir produtos
-                displayProducts(products);
+                // Exibir todos os produtos inicialmente
+                displayProducts(allProducts);
                 
                 // Preencher filtros
-                populateFilters(products);
+                populateFilters(allProducts);
                 
             } catch (error) {
                 console.error('Erro ao carregar produtos:', error);
@@ -359,9 +401,17 @@
         // Função para preencher os filtros
         function populateFilters(products) {
             const sectionFilter = document.getElementById('section-filter');
-            const sections = [...new Set(products.map(p => p.secao).filter(Boolean))];
             
-            sections.forEach(section => {
+            // Limpar opções existentes (exceto a primeira)
+            while (sectionFilter.children.length > 1) {
+                sectionFilter.removeChild(sectionFilter.lastChild);
+            }
+            
+            // Definir as seções fixas que você mencionou
+            const fixedSections = ['Masculino', 'Feminino', 'Ipanema', 'Classica', 'Lançamento'];
+            
+            // Adicionar as seções fixas ao filtro
+            fixedSections.forEach(section => {
                 const option = document.createElement('option');
                 option.value = section;
                 option.textContent = section;
@@ -375,12 +425,36 @@
             const stockFilter = document.getElementById('stock-filter').value;
             const searchTerm = document.getElementById('search').value.toLowerCase();
             
-            // Recarregar produtos e aplicar filtros
-            loadProducts().then(() => {
-                // Esta é uma implementação simplificada
-                // Em uma implementação real, você aplicaria os filtros sem recarregar
-                // todos os dados da planilha
-            });
+            let filteredProducts = [...allProducts];
+            
+            // Aplicar filtro de seção
+            if (sectionFilter) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.secao === sectionFilter
+                );
+            }
+            
+            // Aplicar filtro de estoque
+            if (stockFilter === 'in-stock') {
+                filteredProducts = filteredProducts.filter(product => 
+                    parseInt(product.estoque) > 0
+                );
+            } else if (stockFilter === 'out-of-stock') {
+                filteredProducts = filteredProducts.filter(product => 
+                    parseInt(product.estoque) <= 0
+                );
+            }
+            
+            // Aplicar filtro de busca
+            if (searchTerm) {
+                filteredProducts = filteredProducts.filter(product => 
+                    product.descricao.toLowerCase().includes(searchTerm) ||
+                    product.codigo.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Exibir produtos filtrados
+            displayProducts(filteredProducts);
         }
         
         // Configurar eventos
