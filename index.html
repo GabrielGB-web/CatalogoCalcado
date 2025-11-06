@@ -46,7 +46,7 @@
         }
 
         .container {
-            max-width: 1600px; /* Aumentei a largura máxima */
+            max-width: 1600px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -107,10 +107,51 @@
             background-color: #5a0db3;
         }
 
+        .favorites-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .favorites-info {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #6a11cb;
+        }
+
+        .pdf-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pdf-button:hover {
+            background-color: #c82333;
+        }
+
+        .pdf-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 produtos por linha */
-            gap: 1.5rem; /* Reduzi um pouco o gap para caber 5 produtos */
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1.5rem;
         }
 
         .product-card {
@@ -122,6 +163,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            position: relative;
         }
 
         .product-card:hover {
@@ -129,9 +171,36 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
         }
 
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .favorite-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .favorite-btn.favorited {
+            color: #dc3545;
+        }
+
         .product-image {
             width: 100%;
-            height: 200px; /* Reduzi a altura para melhor proporção */
+            height: 200px;
             object-fit: cover;
             border-bottom: 1px solid #eee;
         }
@@ -215,13 +284,13 @@
 
         @media (max-width: 1400px) {
             .products-grid {
-                grid-template-columns: repeat(4, 1fr); /* 4 produtos em telas menores */
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
         @media (max-width: 1200px) {
             .products-grid {
-                grid-template-columns: repeat(3, 1fr); /* 3 produtos em tablets grandes */
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
@@ -240,13 +309,19 @@
             }
             
             .products-grid {
-                grid-template-columns: repeat(2, 1fr); /* 2 produtos em tablets */
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .favorites-section {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
             }
         }
 
         @media (max-width: 480px) {
             .products-grid {
-                grid-template-columns: 1fr; /* 1 produto em mobile */
+                grid-template-columns: 1fr;
             }
             
             .container {
@@ -254,12 +329,14 @@
             }
         }
     </style>
+    <!-- Incluindo a biblioteca jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <header>
         <div class="logo-container">
-            <!-- Substitua o src pelo link da sua imagem -->
-            <img src="https://via.placeholder.com/200x80?text=LOGO+DA+EMPRESA" alt="Logo da Empresa" class="company-logo">
+            <img src="https://i.ibb.co/rGTPCZQz/LOGO-GTA.png" alt="Logo da Empresa" class="company-logo">
         </div>
         <h1>Catálogo de Calçados</h1>
         <p class="subtitle">Encontre o calçado perfeito para você</p>
@@ -292,6 +369,15 @@
             </div>
         </div>
 
+        <div class="favorites-section">
+            <div class="favorites-info">
+                <span id="favorites-count">0</span> produto(s) favoritado(s)
+            </div>
+            <button class="pdf-button" id="generate-pdf" disabled>
+                📄 Gerar PDF dos Favoritos
+            </button>
+        </div>
+
         <div id="products-container" class="products-grid">
             <div class="loading">Carregando produtos...</div>
         </div>
@@ -303,12 +389,12 @@
 
     <script>
         // ID da planilha pública do Google Sheets
-        // Substitua pelo ID da sua planilha
         const SPREADSHEET_ID = '1tiz1z552NN3srs-k4gKNYB253PEaIsjesTgbkyfIaIg';
         
         // Array para armazenar todos os produtos
         let allProducts = [];
-        
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
         // Função para carregar dados da planilha
         async function loadProducts() {
             const container = document.getElementById('products-container');
@@ -328,6 +414,9 @@
                 
                 // Preencher filtros
                 populateFilters(allProducts);
+                
+                // Atualizar contador de favoritos
+                updateFavoritesCount();
                 
             } catch (error) {
                 console.error('Erro ao carregar produtos:', error);
@@ -378,8 +467,12 @@
                 
                 const stockClass = parseInt(product.estoque) > 0 ? 'in-stock' : 'out-of-stock';
                 const stockText = parseInt(product.estoque) > 0 ? `Em estoque: ${product.estoque}` : 'Fora de estoque';
+                const isFavorited = favorites.includes(product.codigo);
                 
                 card.innerHTML = `
+                    <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" data-code="${product.codigo}">
+                        ${isFavorited ? '❤️' : '🤍'}
+                    </button>
                     <img src="${product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível'}" 
                          alt="${product.descricao}" 
                          class="product-image"
@@ -396,6 +489,11 @@
                 
                 container.appendChild(card);
             });
+            
+            // Adicionar event listeners para os botões de favorito
+            document.querySelectorAll('.favorite-btn').forEach(btn => {
+                btn.addEventListener('click', toggleFavorite);
+            });
         }
         
         // Função para preencher os filtros
@@ -407,11 +505,11 @@
                 sectionFilter.removeChild(sectionFilter.lastChild);
             }
             
-            // Definir as seções fixas que você mencionou
-            const fixedSections = ['Masculino', 'Feminino', 'Ipanema', 'Classica', 'Lançamento'];
+            // Extrair seções únicas dos produtos
+            const sections = [...new Set(products.map(p => p.secao).filter(Boolean))];
             
-            // Adicionar as seções fixas ao filtro
-            fixedSections.forEach(section => {
+            // Adicionar as seções ao filtro
+            sections.forEach(section => {
                 const option = document.createElement('option');
                 option.value = section;
                 option.textContent = section;
@@ -430,7 +528,7 @@
             // Aplicar filtro de seção
             if (sectionFilter) {
                 filteredProducts = filteredProducts.filter(product => 
-                    product.secao === sectionFilter
+                    product.secao && product.secao === sectionFilter
                 );
             }
             
@@ -457,6 +555,96 @@
             displayProducts(filteredProducts);
         }
         
+        // Função para alternar favorito
+        function toggleFavorite(event) {
+            const button = event.currentTarget;
+            const productCode = button.getAttribute('data-code');
+            
+            if (favorites.includes(productCode)) {
+                // Remover dos favoritos
+                favorites = favorites.filter(code => code !== productCode);
+                button.classList.remove('favorited');
+                button.innerHTML = '🤍';
+            } else {
+                // Adicionar aos favoritos
+                favorites.push(productCode);
+                button.classList.add('favorited');
+                button.innerHTML = '❤️';
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            
+            // Atualizar contador e estado do botão PDF
+            updateFavoritesCount();
+        }
+        
+        // Função para atualizar contador de favoritos
+        function updateFavoritesCount() {
+            const countElement = document.getElementById('favorites-count');
+            const pdfButton = document.getElementById('generate-pdf');
+            
+            countElement.textContent = favorites.length;
+            
+            // Habilitar/desabilitar botão PDF
+            pdfButton.disabled = favorites.length === 0;
+        }
+        
+        // Função para gerar PDF dos favoritos
+        function generatePDF() {
+            if (favorites.length === 0) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Adicionar título
+            doc.setFontSize(20);
+            doc.text('Catálogo de Favoritos', 105, 15, { align: 'center' });
+            
+            // Adicionar data
+            const now = new Date();
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 105, 22, { align: 'center' });
+            
+            let yPosition = 35;
+            const pageHeight = doc.internal.pageSize.height;
+            
+            // Filtrar produtos favoritados
+            const favoriteProducts = allProducts.filter(product => 
+                favorites.includes(product.codigo)
+            );
+            
+            // Adicionar cada produto favoritado
+            favoriteProducts.forEach((product, index) => {
+                // Verificar se precisa de nova página
+                if (yPosition > pageHeight - 50) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                // Adicionar código e descrição
+                doc.setFontSize(14);
+                doc.text(`Código: ${product.codigo}`, 15, yPosition);
+                doc.text(`Descrição: ${product.descricao}`, 15, yPosition + 7);
+                
+                // Adicionar seção e estoque
+                doc.setFontSize(12);
+                doc.text(`Seção: ${product.secao || 'Geral'}`, 15, yPosition + 15);
+                doc.text(`Estoque: ${product.estoque}`, 15, yPosition + 22);
+                
+                yPosition += 35;
+                
+                // Adicionar linha separadora
+                if (index < favoriteProducts.length - 1) {
+                    doc.line(15, yPosition - 5, 195, yPosition - 5);
+                    yPosition += 5;
+                }
+            });
+            
+            // Salvar PDF
+            doc.save('catalogo-favoritos.pdf');
+        }
+        
         // Configurar eventos
         document.getElementById('section-filter').addEventListener('change', filterProducts);
         document.getElementById('stock-filter').addEventListener('change', filterProducts);
@@ -466,6 +654,7 @@
                 filterProducts();
             }
         });
+        document.getElementById('generate-pdf').addEventListener('click', generatePDF);
         
         // Carregar produtos quando a página carregar
         document.addEventListener('DOMContentLoaded', loadProducts);
