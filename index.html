@@ -19,7 +19,7 @@
         }
 
         header {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: linear-gradient(135deg, #070236 0%, #070236 100%);
             color: white;
             padding: 0;
             text-align: center;
@@ -82,7 +82,7 @@
         }
 
         .search-button {
-            background-color: #6a11cb;
+            background-color: #070236;
             color: white;
             border: none;
             padding: 0.7rem 1rem;
@@ -93,7 +93,7 @@
         }
 
         .search-button:hover {
-            background-color: #5a0db3;
+            background-color: #070236;
         }
 
         .client-section {
@@ -105,7 +105,7 @@
         }
 
         .client-section h3 {
-            color: #6a11cb;
+            color: #070236;
             margin-bottom: 1rem;
             text-align: center;
         }
@@ -147,7 +147,7 @@
         .client-history h4 {
             color: #495057;
             margin-bottom: 1rem;
-            border-bottom: 2px solid #6a11cb;
+            border-bottom: 2px solid #070236;
             padding-bottom: 0.5rem;
         }
 
@@ -165,7 +165,7 @@
         }
 
         .history-table th {
-            background-color: #6a11cb;
+            background-color: #070236;
             color: white;
             font-weight: 600;
         }
@@ -196,7 +196,7 @@
         .favorites-info {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #6a11cb;
+            color: #070236;
         }
 
         .pdf-button {
@@ -434,23 +434,24 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.8); /* Botões mais escuros */
+            background: rgba(0, 0, 0, 0.9); /* Botões ainda mais escuros */
             color: white;
-            border: 2px solid white; /* Borda branca para contraste */
+            border: 2px solid white;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
+            width: 60px; /* Botões maiores */
+            height: 60px;
+            font-size: 28px;
             cursor: pointer;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Sombra para destaque */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7); /* Sombra mais forte */
+            z-index: 1002; /* Z-index mais alto */
         }
 
         .modal-nav:hover {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 1);
             transform: translateY(-50%) scale(1.1);
         }
 
@@ -460,6 +461,33 @@
 
         .modal-next {
             right: 20px;
+        }
+
+        .modal-favorite-btn {
+            position: absolute;
+            top: 20px;
+            left: 35px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+
+        .modal-favorite-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .modal-favorite-btn.favorited {
+            color: #dc3545;
         }
 
         .modal-caption {
@@ -472,6 +500,7 @@
             font-size: 16px;
             padding: 10px;
             background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
         }
 
         footer {
@@ -528,21 +557,34 @@
             }
 
             .modal-nav {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+                top: auto;
+                bottom: 20px;
+                transform: none;
             }
 
             .modal-prev {
-                left: 10px;
+                left: 20px;
+                right: auto;
             }
 
             .modal-next {
-                right: 10px;
+                right: 20px;
+                left: auto;
+            }
+
+            .modal-favorite-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+                top: 15px;
+                left: 15px;
             }
 
             .close-modal {
-                top: 10px;
+                top: 15px;
                 right: 20px;
                 font-size: 30px;
             }
@@ -571,10 +613,47 @@
             }
 
             .modal-nav {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+                bottom: 15px;
             }
+
+            .modal-prev {
+                left: 15px;
+            }
+
+            .modal-next {
+                right: 15px;
+            }
+
+            .modal-favorite-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                top: 10px;
+                left: 10px;
+            }
+
+            .close-modal {
+                top: 10px;
+                right: 15px;
+                font-size: 25px;
+            }
+        }
+
+        /* Indicador de favoritos no topo */
+        .favorites-indicator {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-left: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
     </style>
     <!-- Incluindo a biblioteca jsPDF -->
@@ -634,6 +713,9 @@
         <div class="favorites-section">
             <div class="favorites-info">
                 <span id="favorites-count">0</span> produto(s) favoritado(s)
+                <div class="favorites-indicator" id="favorites-indicator" style="display: none;">
+                    ⭐ Favoritos no topo
+                </div>
             </div>
             <button class="pdf-button" id="generate-pdf" disabled>
                 📄 Gerar PDF dos Favoritos
@@ -650,6 +732,7 @@
         <span class="close-modal">&times;</span>
         <button class="modal-nav modal-prev">&#10094;</button>
         <button class="modal-nav modal-next">&#10095;</button>
+        <button class="modal-favorite-btn" id="modal-favorite-btn">🤍</button>
         <img class="modal-content" id="modalImage">
         <div class="modal-caption" id="modalCaption"></div>
     </div>
@@ -668,6 +751,7 @@
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let currentProducts = []; // Produtos atualmente exibidos
         let currentImageIndex = 0; // Índice da imagem atual no modal
+        let showFavoritesFirst = localStorage.getItem('showFavoritesFirst') === 'true';
 
         // Função para carregar dados da planilha do catálogo
         async function loadProducts() {
@@ -682,9 +766,11 @@
                 
                 // Converter CSV para JSON
                 allProducts = parseCSV(csvData);
-                currentProducts = [...allProducts];
                 
-                // Exibir todos os produtos inicialmente
+                // Ordenar produtos (favoritos primeiro se ativado)
+                currentProducts = sortProducts([...allProducts]);
+                
+                // Exibir produtos
                 displayProducts(currentProducts);
                 
                 // Preencher filtros
@@ -697,6 +783,21 @@
                 console.error('Erro ao carregar produtos:', error);
                 container.innerHTML = '<div class="error">Erro ao carregar os produtos. Verifique se a planilha está configurada corretamente.</div>';
             }
+        }
+
+        // Função para ordenar produtos (favoritos primeiro)
+        function sortProducts(products) {
+            if (showFavoritesFirst && favorites.length > 0) {
+                return products.sort((a, b) => {
+                    const aIsFavorited = favorites.includes(a.codigo);
+                    const bIsFavorited = favorites.includes(b.codigo);
+                    
+                    if (aIsFavorited && !bIsFavorited) return -1;
+                    if (!aIsFavorited && bIsFavorited) return 1;
+                    return 0;
+                });
+            }
+            return products;
         }
 
         // Função para buscar histórico do cliente
@@ -751,6 +852,7 @@
                         <thead>
                             <tr>
                                 <th>Mês</th>
+                                <th>Código Produto</th>
                                 <th>Produto</th>
                                 <th>Quantidade</th>
                             </tr>
@@ -762,6 +864,7 @@
                     tableHTML += `
                         <tr>
                             <td>${formatMonth(purchase.DATA)}</td>
+                            <td>${purchase.CODPROD || 'N/A'}</td>
                             <td>${purchase.DESCRICAO || 'N/A'}</td>
                             <td>${purchase.QTT || '0'}</td>
                         </tr>
@@ -901,9 +1004,16 @@
                 const modal = document.getElementById('imageModal');
                 const modalImg = document.getElementById('modalImage');
                 const caption = document.getElementById('modalCaption');
+                const modalFavoriteBtn = document.getElementById('modal-favorite-btn');
                 
                 modal.style.display = 'block';
                 modalImg.src = product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível';
+                
+                const isFavorited = favorites.includes(product.codigo);
+                modalFavoriteBtn.innerHTML = isFavorited ? '❤️' : '🤍';
+                modalFavoriteBtn.className = isFavorited ? 'modal-favorite-btn favorited' : 'modal-favorite-btn';
+                modalFavoriteBtn.setAttribute('data-code', product.codigo);
+                
                 caption.innerHTML = `
                     <strong>${product.descricao}</strong><br>
                     Código: ${product.codigo} | Seção: ${product.secao || 'Geral'} | Estoque: ${product.estoque}
@@ -935,8 +1045,15 @@
             const product = currentProducts[currentImageIndex];
             const modalImg = document.getElementById('modalImage');
             const caption = document.getElementById('modalCaption');
+            const modalFavoriteBtn = document.getElementById('modal-favorite-btn');
             
             modalImg.src = product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível';
+            
+            const isFavorited = favorites.includes(product.codigo);
+            modalFavoriteBtn.innerHTML = isFavorited ? '❤️' : '🤍';
+            modalFavoriteBtn.className = isFavorited ? 'modal-favorite-btn favorited' : 'modal-favorite-btn';
+            modalFavoriteBtn.setAttribute('data-code', product.codigo);
+            
             caption.innerHTML = `
                 <strong>${product.descricao}</strong><br>
                 Código: ${product.codigo} | Seção: ${product.secao || 'Geral'} | Estoque: ${product.estoque}
@@ -998,6 +1115,9 @@
                 );
             }
             
+            // Ordenar produtos filtrados
+            filteredProducts = sortProducts(filteredProducts);
+            
             // Exibir produtos filtrados
             displayProducts(filteredProducts);
         }
@@ -1007,6 +1127,27 @@
             const button = event.currentTarget;
             const productCode = button.getAttribute('data-code');
             
+            toggleFavoriteProduct(productCode, button);
+        }
+
+        // Função para alternar favorito do modal
+        function toggleModalFavorite() {
+            const button = document.getElementById('modal-favorite-btn');
+            const productCode = button.getAttribute('data-code');
+            
+            toggleFavoriteProduct(productCode, button);
+            
+            // Atualizar também o botão na grade de produtos
+            const productButton = document.querySelector(`.favorite-btn[data-code="${productCode}"]`);
+            if (productButton) {
+                const isFavorited = favorites.includes(productCode);
+                productButton.innerHTML = isFavorited ? '❤️' : '🤍';
+                productButton.className = isFavorited ? 'favorite-btn favorited' : 'favorite-btn';
+            }
+        }
+
+        // Função principal para alternar favorito
+        function toggleFavoriteProduct(productCode, button) {
             if (favorites.includes(productCode)) {
                 // Remover dos favoritos
                 favorites = favorites.filter(code => code !== productCode);
@@ -1024,17 +1165,42 @@
             
             // Atualizar contador e estado do botão PDF
             updateFavoritesCount();
+            
+            // Reordenar produtos se a opção estiver ativada
+            if (showFavoritesFirst) {
+                currentProducts = sortProducts([...currentProducts]);
+                displayProducts(currentProducts);
+            }
         }
         
         // Função para atualizar contador de favoritos
         function updateFavoritesCount() {
             const countElement = document.getElementById('favorites-count');
             const pdfButton = document.getElementById('generate-pdf');
+            const favoritesIndicator = document.getElementById('favorites-indicator');
             
             countElement.textContent = favorites.length;
             
             // Habilitar/desabilitar botão PDF
             pdfButton.disabled = favorites.length === 0;
+            
+            // Mostrar/ocultar indicador de favoritos no topo
+            if (showFavoritesFirst && favorites.length > 0) {
+                favoritesIndicator.style.display = 'inline-flex';
+            } else {
+                favoritesIndicator.style.display = 'none';
+            }
+        }
+
+        // Função para alternar a opção de favoritos no topo
+        function toggleFavoritesFirst() {
+            showFavoritesFirst = !showFavoritesFirst;
+            localStorage.setItem('showFavoritesFirst', showFavoritesFirst);
+            
+            // Reordenar e exibir produtos
+            currentProducts = sortProducts([...allProducts]);
+            displayProducts(currentProducts);
+            updateFavoritesCount();
         }
         
         // Função para gerar PDF dos favoritos
@@ -1126,6 +1292,13 @@
                     }
                 }
             });
+
+            // Evento para alternar favoritos no topo (clique no contador)
+            document.getElementById('favorites-count').addEventListener('click', function() {
+                if (favorites.length > 0) {
+                    toggleFavoritesFirst();
+                }
+            });
             
             // Eventos do modal
             document.querySelector('.close-modal').addEventListener('click', closeModal);
@@ -1135,6 +1308,7 @@
             document.querySelector('.modal-next').addEventListener('click', function() {
                 navigateImage(1);
             });
+            document.getElementById('modal-favorite-btn').addEventListener('click', toggleModalFavorite);
             
             // Fechar modal ao clicar fora da imagem
             document.getElementById('imageModal').addEventListener('click', function(event) {
@@ -1153,6 +1327,8 @@
                         navigateImage(-1);
                     } else if (event.key === 'ArrowRight') {
                         navigateImage(1);
+                    } else if (event.key === 'f' || event.key === 'F') {
+                        toggleModalFavorite();
                     }
                 }
             });
