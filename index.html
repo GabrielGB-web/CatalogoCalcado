@@ -19,30 +19,19 @@
         }
 
         header {
-            background: linear-gradient(135deg, #070249 0%, #070249 100%);
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
             color: white;
-            padding: 2rem 0;
+            padding: 0;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
-        .logo-container {
-            margin-bottom: 1rem;
-        }
-
-        .company-logo {
-            max-width: 200px;
-            height: auto;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
+        .header-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            display: block;
         }
 
         .container {
@@ -93,7 +82,7 @@
         }
 
         .search-button {
-            background-color: #070249;
+            background-color: #6a11cb;
             color: white;
             border: none;
             padding: 0.7rem 1rem;
@@ -104,7 +93,7 @@
         }
 
         .search-button:hover {
-            background-color: #070249;
+            background-color: #5a0db3;
         }
 
         .favorites-section {
@@ -121,7 +110,7 @@
         .favorites-info {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #070249;
+            color: #6a11cb;
         }
 
         .pdf-button {
@@ -260,7 +249,7 @@
             text-align: center;
             padding: 2rem;
             font-size: 1.2rem;
-            color: #070249;
+            color: #6a11cb;
             grid-column: 1 / -1;
         }
 
@@ -317,6 +306,10 @@
                 gap: 1rem;
                 text-align: center;
             }
+
+            .header-image {
+                max-height: 200px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -327,6 +320,10 @@
             .container {
                 padding: 1rem;
             }
+
+            .header-image {
+                max-height: 150px;
+            }
         }
     </style>
     <!-- Incluindo a biblioteca jsPDF -->
@@ -335,11 +332,10 @@
 </head>
 <body>
     <header>
-        <div class="logo-container">
-            <img src="https://i.ibb.co/rGTPCZQz/LOGO-GTA.png" alt="Logo da Empresa" class="company-logo">
-        </div>
-        <h1>Catálogo de Calçados Francal</h1>
-        <p class="subtitle">O presente que mais agrada aos pés e ao coração!</p>
+        <!-- Substitua o src pelo link da sua imagem com título e logo -->
+        <img src="https://i.ibb.co/Fb7KY7Mz/Catalogo-Francal.png" 
+             alt="Catálogo de Calçados" 
+             class="header-image">
     </header>
 
     <div class="container">
