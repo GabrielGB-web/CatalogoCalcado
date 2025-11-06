@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Calçados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        select, input {
+            padding: 0.7rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .search-box input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .search-button {
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            padding: 0.7rem 1rem;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-button:hover {
+            background-color: #5a0db3;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-code {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-description {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            min-height: 60px;
+        }
+
+        .product-section {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .stock-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .in-stock {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .out-of-stock {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: #6a11cb;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #dc3545;
+            background-color: #f8d7da;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            background-color: #343a40;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            select, input {
+                width: 100%;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Catálogo de Calçados</h1>
+        <p class="subtitle">Encontre o calçado perfeito para você</p>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <label for="section-filter">Filtrar por Seção:</label>
+                <select id="section-filter">
+                    <option value="">Todas as seções</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="stock-filter">Filtrar por Estoque:</label>
+                <select id="stock-filter">
+                    <option value="all">Todos os produtos</option>
+                    <option value="in-stock">Apenas em estoque</option>
+                    <option value="out-of-stock">Fora de estoque</option>
+                </select>
+            </div>
+            
+            <div class="filter-group search-box">
+                <label for="search">Buscar produto:</label>
+                <div style="display: flex; width: 100%;">
+                    <input type="text" id="search" placeholder="Digite o nome ou código do produto">
+                    <button class="search-button" id="search-button">Buscar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="products-container" class="products-grid">
+            <div class="loading">Carregando produtos...</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Catálogo de Calçados &copy; 2023 - Atualizado automaticamente via planilha</p>
+    </footer>
+
+    <script>
+        // ID da planilha pública do Google Sheets
+        // Substitua pelo ID da sua planilha
+        const SPREADSHEET_ID = '1tiz1z552NN3srs-k4gKNYB253PEaIsjesTgbkyfIaIg';
+        const API_KEY = 'YOUR_GOOGLE_API_KEY'; // Opcional para planilhas públicas
+        
+        // Função para carregar dados da planilha
+        async function loadProducts() {
+            const container = document.getElementById('products-container');
+            
+            try {
+                // URL para acessar a planilha como JSON (formato CSV)
+                // Para planilhas públicas, você pode usar:
+                const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv`;
+                
+                // Alternativa: se você publicar a planilha como CSV
+                // const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv`;
+                
+                const response = await fetch(url);
+                const csvData = await response.text();
+                
+                // Converter CSV para JSON
+                const products = parseCSV(csvData);
+                
+                // Exibir produtos
+                displayProducts(products);
+                
+                // Preencher filtros
+                populateFilters(products);
+                
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                container.innerHTML = '<div class="error">Erro ao carregar os produtos. Verifique se a planilha está configurada corretamente.</div>';
+            }
+        }
+        
+        // Função para converter CSV para JSON
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(header => header.replace(/"/g, '').trim());
+            
+            const products = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                const values = lines[i].split(',').map(value => value.replace(/"/g, '').trim());
+                const product = {};
+                
+                headers.forEach((header, index) => {
+                    product[header] = values[index] || '';
+                });
+                
+                // Validar se o produto tem dados mínimos
+                if (product.codigo && product.descricao) {
+                    products.push(product);
+                }
+            }
+            
+            return products;
+        }
+        
+        // Função para exibir produtos
+        function displayProducts(products) {
+            const container = document.getElementById('products-container');
+            
+            if (products.length === 0) {
+                container.innerHTML = '<div class="error">Nenhum produto encontrado.</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                const stockClass = parseInt(product.estoque) > 0 ? 'in-stock' : 'out-of-stock';
+                const stockText = parseInt(product.estoque) > 0 ? `Em estoque: ${product.estoque}` : 'Fora de estoque';
+                
+                card.innerHTML = `
+                    <img src="${product.imagem || 'https://via.placeholder.com/300x200?text=Imagem+Indisponível'}" 
+                         alt="${product.descricao}" 
+                         class="product-image"
+                         onerror="this.src='https://via.placeholder.com/300x200?text=Imagem+Indisponível'">
+                    <div class="product-info">
+                        <div class="product-code">Código: ${product.codigo}</div>
+                        <div class="product-description">${product.descricao}</div>
+                        <div class="product-section">${product.secao || 'Geral'}</div>
+                        <div class="stock-info">
+                            <span class="${stockClass}">${stockText}</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        // Função para preencher os filtros
+        function populateFilters(products) {
+            const sectionFilter = document.getElementById('section-filter');
+            const sections = [...new Set(products.map(p => p.secao).filter(Boolean))];
+            
+            sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section;
+                option.textContent = section;
+                sectionFilter.appendChild(option);
+            });
+        }
+        
+        // Função para filtrar produtos
+        function filterProducts() {
+            const sectionFilter = document.getElementById('section-filter').value;
+            const stockFilter = document.getElementById('stock-filter').value;
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            
+            // Recarregar produtos e aplicar filtros
+            loadProducts().then(() => {
+                // Esta é uma implementação simplificada
+                // Em uma implementação real, você aplicaria os filtros sem recarregar
+                // todos os dados da planilha
+            });
+        }
+        
+        // Configurar eventos
+        document.getElementById('section-filter').addEventListener('change', filterProducts);
+        document.getElementById('stock-filter').addEventListener('change', filterProducts);
+        document.getElementById('search-button').addEventListener('click', filterProducts);
+        document.getElementById('search').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                filterProducts();
+            }
+        });
+        
+        // Carregar produtos quando a página carregar
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+</body>
+</html>
