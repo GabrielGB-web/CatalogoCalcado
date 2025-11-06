@@ -96,6 +96,92 @@
             background-color: #5a0db3;
         }
 
+        .client-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .client-section h3 {
+            color: #6a11cb;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .client-form {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .client-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .client-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .client-button:hover {
+            background-color: #218838;
+        }
+
+        .client-history {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .client-history h4 {
+            color: #495057;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #6a11cb;
+            padding-bottom: 0.5rem;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .history-table th {
+            background-color: #6a11cb;
+            color: white;
+            font-weight: 600;
+        }
+
+        .history-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .history-summary {
+            background-color: #e9ecef;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
         .favorites-section {
             display: flex;
             justify-content: space-between;
@@ -348,22 +434,24 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.8); /* Botões mais escuros */
             color: white;
-            border: none;
+            border: 2px solid white; /* Borda branca para contraste */
             border-radius: 50%;
             width: 50px;
             height: 50px;
             font-size: 24px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Sombra para destaque */
         }
 
         .modal-nav:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.9);
+            transform: translateY(-50%) scale(1.1);
         }
 
         .modal-prev {
@@ -430,6 +518,11 @@
                 text-align: center;
             }
 
+            .client-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
             .header-image {
                 max-height: 200px;
             }
@@ -453,6 +546,15 @@
                 right: 20px;
                 font-size: 30px;
             }
+
+            .history-table {
+                font-size: 0.8rem;
+            }
+
+            .history-table th,
+            .history-table td {
+                padding: 0.5rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -466,6 +568,12 @@
 
             .header-image {
                 max-height: 150px;
+            }
+
+            .modal-nav {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
             }
         }
     </style>
@@ -481,6 +589,22 @@
     </header>
 
     <div class="container">
+        <!-- Seção de Histórico do Cliente -->
+        <div class="client-section">
+            <h3>📋 Consultar Histórico do Cliente</h3>
+            <div class="client-form">
+                <div class="client-input-group">
+                    <label for="client-code">Código do Cliente:</label>
+                    <input type="text" id="client-code" placeholder="Digite o código do cliente">
+                </div>
+                <button class="client-button" id="search-client">Buscar Histórico</button>
+            </div>
+            <div class="client-history" id="client-history">
+                <h4>Histórico de Compras</h4>
+                <div id="history-content"></div>
+            </div>
+        </div>
+
         <div class="filters">
             <div class="filter-group">
                 <label for="section-filter">Filtrar por Seção:</label>
@@ -535,8 +659,9 @@
     </footer>
 
     <script>
-        // ID da planilha pública do Google Sheets
-        const SPREADSHEET_ID = '1tiz1z552NN3srs-k4gKNYB253PEaIsjesTgbkyfIaIg';
+        // IDs das planilhas
+        const CATALOGO_SPREADSHEET_ID = '1tiz1z552NN3srs-k4gKNYB253PEaIsjesTgbkyfIaIg';
+        const HISTORICO_SPREADSHEET_ID = '1aaFpE_js07X7IBh6KlglU7rAqvzmrXqto3TzLFKcJ3I';
         
         // Array para armazenar todos os produtos
         let allProducts = [];
@@ -544,13 +669,13 @@
         let currentProducts = []; // Produtos atualmente exibidos
         let currentImageIndex = 0; // Índice da imagem atual no modal
 
-        // Função para carregar dados da planilha
+        // Função para carregar dados da planilha do catálogo
         async function loadProducts() {
             const container = document.getElementById('products-container');
             
             try {
                 // URL para acessar a planilha como JSON (formato CSV)
-                const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv`;
+                const url = `https://docs.google.com/spreadsheets/d/${CATALOGO_SPREADSHEET_ID}/gviz/tq?tqx=out:csv`;
                 
                 const response = await fetch(url);
                 const csvData = await response.text();
@@ -573,31 +698,131 @@
                 container.innerHTML = '<div class="error">Erro ao carregar os produtos. Verifique se a planilha está configurada corretamente.</div>';
             }
         }
+
+        // Função para buscar histórico do cliente
+        async function loadClientHistory(clientCode) {
+            const historyContent = document.getElementById('history-content');
+            const clientHistory = document.getElementById('client-history');
+            
+            try {
+                historyContent.innerHTML = '<div class="loading">Buscando histórico...</div>';
+                clientHistory.style.display = 'block';
+
+                // URL para acessar a planilha de histórico
+                const url = `https://docs.google.com/spreadsheets/d/${HISTORICO_SPREADSHEET_ID}/gviz/tq?tqx=out:csv`;
+                
+                const response = await fetch(url);
+                const csvData = await response.text();
+                
+                // Converter CSV para JSON
+                const historyData = parseCSV(csvData);
+                
+                // Filtrar compras do cliente
+                const clientPurchases = historyData.filter(item => 
+                    item.CODCLI && item.CODCLI.toString() === clientCode.toString()
+                );
+
+                if (clientPurchases.length === 0) {
+                    historyContent.innerHTML = '<div class="error">Nenhuma compra encontrada para este cliente.</div>';
+                    return;
+                }
+
+                // Ordenar por data (mais recente primeiro)
+                clientPurchases.sort((a, b) => new Date(b.DATA) - new Date(a.DATA));
+
+                // Calcular totais
+                const totalProducts = clientPurchases.length;
+                const totalQuantity = clientPurchases.reduce((sum, item) => sum + parseInt(item.QTT || 0), 0);
+
+                // Criar tabela
+                let tableHTML = `
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                clientPurchases.forEach(purchase => {
+                    tableHTML += `
+                        <tr>
+                            <td>${formatDate(purchase.DATA)}</td>
+                            <td>${purchase.DESCRICAO || 'N/A'}</td>
+                            <td>${purchase.QTT || '0'}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                    <div class="history-summary">
+                        Total de produtos comprados: ${totalProducts} | Quantidade total: ${totalQuantity}
+                    </div>
+                `;
+
+                historyContent.innerHTML = tableHTML;
+
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+                historyContent.innerHTML = '<div class="error">Erro ao carregar o histórico. Tente novamente.</div>';
+            }
+        }
+
+        // Função para formatar data
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR');
+            } catch {
+                return dateString;
+            }
+        }
         
         // Função para converter CSV para JSON
         function parseCSV(csv) {
             const lines = csv.split('\n');
+            if (lines.length === 0) return [];
+            
             const headers = lines[0].split(',').map(header => header.replace(/"/g, '').trim());
             
-            const products = [];
+            const data = [];
             
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim() === '') continue;
                 
-                const values = lines[i].split(',').map(value => value.replace(/"/g, '').trim());
-                const product = {};
+                // Método mais robusto para parsing CSV
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+                
+                const item = {};
                 
                 headers.forEach((header, index) => {
-                    product[header] = values[index] || '';
+                    item[header] = (values[index] || '').replace(/"/g, '').trim();
                 });
                 
-                // Validar se o produto tem dados mínimos
-                if (product.codigo && product.descricao) {
-                    products.push(product);
-                }
+                data.push(item);
             }
             
-            return products;
+            return data;
         }
         
         // Função para exibir produtos
@@ -872,6 +1097,26 @@
             
             // Evento do botão PDF
             document.getElementById('generate-pdf').addEventListener('click', generatePDF);
+            
+            // Evento do botão de histórico do cliente
+            document.getElementById('search-client').addEventListener('click', function() {
+                const clientCode = document.getElementById('client-code').value.trim();
+                if (clientCode) {
+                    loadClientHistory(clientCode);
+                } else {
+                    alert('Por favor, digite o código do cliente.');
+                }
+            });
+
+            // Evento do enter no campo do cliente
+            document.getElementById('client-code').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    const clientCode = document.getElementById('client-code').value.trim();
+                    if (clientCode) {
+                        loadClientHistory(clientCode);
+                    }
+                }
+            });
             
             // Eventos do modal
             document.querySelector('.close-modal').addEventListener('click', closeModal);
