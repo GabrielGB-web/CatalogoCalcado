@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Calçados</title>
+    <title>Catálogo de Calçados Francal</title>
     <style>
         * {
             margin: 0;
@@ -229,7 +229,7 @@
             cursor: not-allowed;
         }
 
-        /* GRADE VERTICAL COMPACTA */
+        /* GRADE VERTICAL COMPACTA - MESMO LAYOUT PARA TODOS OS DISPOSITIVOS */
         .products-list {
             display: flex;
             flex-direction: column;
@@ -555,6 +555,7 @@
             font-size: 0.8rem;
         }
 
+        /* MEDIA QUERIES - MESMO LAYOUT PARA TODOS OS DISPOSITIVOS */
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -588,19 +589,39 @@
                 max-height: 180px;
             }
 
-            /* Ajustes para mobile na grade vertical */
+            /* MESMO LAYOUT HORIZONTAL NO CELULAR */
             .product-card {
-                flex-direction: column;
-                height: auto;
-                min-height: 300px;
+                flex-direction: row; /* Mantém layout horizontal */
+                height: 140px; /* Um pouco menor no mobile */
             }
 
             .product-image-container {
-                flex: 0 0 150px;
+                flex: 0 0 120px; /* Imagem menor no mobile */
             }
 
             .product-info {
                 padding: 0.8rem;
+            }
+
+            .product-details {
+                gap: 0.3rem;
+            }
+
+            .detail-row {
+                gap: 0.4rem;
+            }
+
+            .detail-label {
+                min-width: 60px;
+                font-size: 0.75rem;
+            }
+
+            .detail-value {
+                font-size: 0.8rem;
+            }
+
+            .product-description {
+                font-size: 0.9rem;
             }
 
             .modal-nav {
@@ -652,15 +673,42 @@
             }
 
             .product-card {
-                min-height: 280px;
+                height: 130px; /* Ainda mais compacto */
             }
 
             .product-image-container {
-                flex: 0 0 130px;
+                flex: 0 0 100px; /* Imagem ainda menor */
+            }
+
+            .product-info {
+                padding: 0.6rem;
+            }
+
+            .product-details {
+                gap: 0.2rem;
+            }
+
+            .detail-row {
+                gap: 0.3rem;
+            }
+
+            .detail-label {
+                min-width: 55px;
+                font-size: 0.7rem;
+            }
+
+            .detail-value {
+                font-size: 0.75rem;
             }
 
             .product-description {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
+                line-height: 1.2;
+            }
+
+            .product-section {
+                font-size: 0.7rem;
+                padding: 0.15rem 0.5rem;
             }
 
             .modal-nav {
@@ -690,6 +738,33 @@
                 top: 10px;
                 right: 12px;
                 font-size: 24px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .product-card {
+                height: 120px; /* Muito compacto para telas pequenas */
+            }
+
+            .product-image-container {
+                flex: 0 0 90px;
+            }
+
+            .product-info {
+                padding: 0.5rem;
+            }
+
+            .detail-label {
+                min-width: 50px;
+                font-size: 0.65rem;
+            }
+
+            .detail-value {
+                font-size: 0.7rem;
+            }
+
+            .product-description {
+                font-size: 0.8rem;
             }
         }
     </style>
